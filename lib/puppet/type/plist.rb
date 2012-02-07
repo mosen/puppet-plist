@@ -1,24 +1,24 @@
-# Plist type
-
-# The basic idea is that we manage plists similar to how MCX would manage them.
-# The end user provides a number of keys and values that should be managed, in the same structure as the target plist.
-# The puppet plist type can apply those keys and values similar to MCX's 'Once, Often, Always' types.
-# Unfortunately we cannot apply something 'Often' because of how puppet is invoked.
-# The provider can operate in two 'merge modes':
-# - defaults: only set the keys that do not already exist
-# - enforced: always set the values that we specified, every time.
-# The content of the file can be specified in the manifest, in a file, or via an .erb template (Very similar to the File resource).
-
 Puppet::Type.newtype(:plist) do
-	@doc = "Manage key/value pairs in a plist file by merging from a template."
+	@doc = "Manage key/value pairs in a plist file by merging the values from the source file to the specified target
+    file.
+
+    The source can be a static file or an .erb template. It's up to the user to construct a plist with the correct
+    structure to match the target plist file.
+
+    The provider walks the tree of keys and compares the values.
+
+    If the merge parameter is :defaults, values are only set if the corresponding key does not exist.
+    If the merge parameter is :enforced, values are overwritten (on every puppet run).
+
+    If the target file doesn't exist then it is created with the contents of the template/file.
+  "
 	
 	newparam(:path) do
 		desc "Path to the plist file"
 		
 		isnamevar
 	end
-	
-	# TODO: should be property?
+
 	newproperty(:content) do
 	  desc "File or template containing the keys and values to be managed.
 	    Typically this should be an .erb template resulting in an xml plist file, so
