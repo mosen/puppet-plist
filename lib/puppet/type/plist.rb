@@ -1,3 +1,5 @@
+
+
 Puppet::Type.newtype(:plist) do
 	@doc = "Manage key/value pairs in a plist file by merging the values from the source file to the specified target
     file.
@@ -7,35 +9,38 @@ Puppet::Type.newtype(:plist) do
 
     The provider walks the tree of keys and compares the values.
 
-    If the merge parameter is :defaults, values are only set if the corresponding key does not exist.
-    If the merge parameter is :enforced, values are overwritten (on every puppet run).
+    If :force is false, values are only set if the corresponding key does not exist. (no overwrite).
+    If :force is true, values are overwritten (on every puppet run).
 
-    If the target file doesn't exist then it is created with the contents of the template/file.
+    If the target key doesn't exist, it is always set.
+    If the target file doesn't exist, then it is created with the contents of the template/file.
   "
+
+  feature :plist, "The ability to parse and generate .plist files in binary and xml formats."
 	
-	newparam(:path) do
+	newparam(:path, :parent => Puppet::Parameter::Path) do
 		desc "Path to the plist file"
 		
 		isnamevar
 	end
 
 	newproperty(:content) do
-	  desc "File or template containing the keys and values to be managed.
-	    Typically this should be an .erb template resulting in an xml plist file, so
-	    that all of the key values can be set via puppet variables or facter facts."
-	  
+	  desc "Plist content describing keys and values to be enforced.
+
+    You only need to supply the keys and values that need to be changed, not the entire
+    plist structure of the target file.
+    "
+
+    # TODO: validate content as parseable plist.
 	end
 	
-	newparam(:merge) do
-	  desc "How to merge the keys and values from the content to the target specified in the path parameter.
-	    Keys and values from the content parameter can be merged into the file specified by 'path' in two ways:
-	    
-	    1. Defaults mode: Key and value from the content are only set in the target if they do not exist.
-	    2. Enforced mode: Key and value from the content are set regardless of what already exists in the target."
-	  # TODO: should there be a mode for removing specified keys?? I cant think of a use case.
-	  defaultto :enforced
+	newparam(:force) do
+	  desc "Whether to force values (true) or only set them once (false)"
+	  # TODO: A third possible mode might be to delete keys that are absent in the content plist.
+
+	  defaultto :true
 	  
-	  newvalues(:defaults, :enforced)
+	  newvalues(:true, :false)
 	end
 	
 end

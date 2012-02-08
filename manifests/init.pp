@@ -18,7 +18,7 @@ class plist_test {
 	plist { "/tmp/test.plist":
 		# This should be replaced with the same content property as the 'File' type.
 		content => $plist_content,
-		merge => enforced,
+		force => false,
 	}	
 }
 

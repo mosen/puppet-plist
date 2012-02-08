@@ -25,8 +25,12 @@ target.
 
 In any case, if the keys don't exist in the target they are set based on the template (source) plist.
 
+Caveats
+-------
 
+Two puppet modules cannot manage the same resource, at the file level.
 
+Future solution: allow the plist resource to specify a key path to start managing from (subtree management).
 
 Example
 -------
