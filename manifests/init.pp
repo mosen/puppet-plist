@@ -1,4 +1,4 @@
-class plist_test {
+class puppet-plist {
 
 	notify { "Running plist testing manifest": }
 
@@ -20,8 +20,4 @@ class plist_test {
 		content => $plist_content,
 		force => false,
 	}	
-}
-
-node default {
-	include plist_test
 }
