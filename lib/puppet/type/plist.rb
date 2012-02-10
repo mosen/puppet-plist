@@ -32,6 +32,22 @@ Puppet::Type.newtype(:plist) do
     "
 
     # TODO: validate content as parseable plist.
+    def should_to_s(v)
+      puts 'should'
+      v.inspect
+    end
+
+    def is_to_s(v)
+      puts 'is'
+      v.inspect
+    end
+
+    def change_to_s(before, after)
+      puts 'Changed'
+      puts before.inspect
+      puts after.inspect
+    end
+
 	end
 	
 	newparam(:force) do

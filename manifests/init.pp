@@ -9,15 +9,16 @@ class puppet-plist {
 		<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 		<plist version="1.0">
 		<dict>
-			<key>Testing</key>
+			<key>Settings</key>
 			<true/>
 		</dict>
 		</plist>'
 	
-	
+	$settings_string = "this is a test string."
+
 	plist { "/tmp/test.plist":
 		# This should be replaced with the same content property as the 'File' type.
-		content => $plist_content,
+		content => template('puppet-plist/test.plist.erb'),
 		force => false,
 	}	
 }

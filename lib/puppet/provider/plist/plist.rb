@@ -1,6 +1,59 @@
 # TODO: consider Puppet.Features.add :plist, lib => cfpropertylist. Can user submitted providers do this?
 
+
 require 'facter/util/cfpropertylist' # TODO: ruby-libxml not always available
+
+# Uses the excellent ruby hash diff methods at http://stackoverflow.com/questions/1766741/comparing-ruby-hashes
+class Hash
+
+  def diff(other)
+    (self.keys + other.keys).uniq.inject({}) do |memo, key|
+      unless self[key] == other[key]
+        if self[key].kind_of?(Hash) &&  other[key].kind_of?(Hash)
+          memo[key] = self[key].diff(other[key])
+        else
+          memo[key] = [self[key], other[key]]
+        end
+      end
+      memo
+    end
+  end
+
+  def apply_diff!(changes, direction = :right)
+    path = [[self, changes]]
+    pos, local_changes = path.pop
+    while local_changes
+      local_changes.each_pair {|key, change|
+        if change.kind_of?(Array)
+          pos[key] = (direction == :right) ? change[1] : change[0]
+        else
+          path.push([pos[key], change])
+        end
+      }
+      pos, local_changes = path.pop
+    end
+    self
+  end
+
+  def apply_diff(changes, direction = :right)
+    cloned = self.clone
+    path = [[cloned, changes]]
+    pos, local_changes = path.pop
+    while local_changes
+      local_changes.each_pair {|key, change|
+        if change.kind_of?(Array)
+          pos[key] = (direction == :right) ? change[1] : change[0]
+        else
+          pos[key] = pos[key].clone
+          path.push([pos[key], change])
+        end
+      }
+      pos, local_changes = path.pop
+    end
+    cloned
+  end
+end
+
 
 Puppet::Type.type(:plist).provide :plist, :parent => Puppet::Provider do
   desc "
@@ -33,8 +86,8 @@ Puppet::Type.type(:plist).provide :plist, :parent => Puppet::Provider do
     native_values
   end
   
-  def self.plist_diff(plist_a, plist_b)
-    log('Diffing plists');
+  def self.plist_diff(target, settings)
+     target.diff(settings)
   end
 
   # Generate the difference between the supplied source plist and the target.
@@ -42,19 +95,49 @@ Puppet::Type.type(:plist).provide :plist, :parent => Puppet::Provider do
   # contains different keys, but all of the SPECIFIED keys are equal, the content should return the same thing
   # TODO: maybe override insync? or something similar
   def content
-    puts 'Getting content'
 
-    target_plist = self.class.read_plist(@resource[:path]) || {}
-    content_plist = self.class.read_plist_string(@resource[:content])
+    begin
+      target_plist = self.class.read_plist(@resource[:path])
+    rescue
+      target_plist = {}
+    end
 
-    puts content_plist.inspect
-    # Iterate through target to find keys and values matching the content
-    # Return the current values for those keys and values
+    target_plist
 
-    plist_diff_hash = self.plist_diff(target_plist, content_plist)
+    #
+    #
+    ## Iterate through target to find keys and values matching the content
+    ## Return the current values for those keys and values
+    #
+    #plist_differences = self.class.plist_diff(target_plist, settings_plist)
+    #settings_applied = target_plist.apply_diff(plist_differences)
+    #
+    #puts settings_applied.inspect
   end
 
   # Set the plist content to use for merging into the target.
   def content= (value)
+    begin
+      target_plist = self.class.read_plist(@resource[:path])
+      target_hash = CFPropertyList.native_types(target_plist.value)
+    rescue
+      target_hash = {}
+    end
+
+    # Iterate through target to find keys and values matching the content
+    # Return the current values for those keys and values
+
+    settings_plist = self.class.read_plist_string(value)
+    plist_differences = self.class.plist_diff(target_hash, settings_plist)
+    puts plist_differences.inspect
+
+    settings_applied = target_plist.apply_diff(plist_differences)
+    puts settings_applied.inspect
+
+    plist_applied = CFPropertyList::List.new
+    plist_applied.value = CFPropertyList.guess(settings_applied)
+
+    plist_applied.save(@resource[:path], CFPropertyList::List::FORMAT_XML)
+
   end
 end
