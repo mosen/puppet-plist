@@ -31,6 +31,10 @@ Puppet::Type.newtype(:plist) do
     plist structure of the target file.
     "
 
+    def property_matches?(current, desired)
+      # parse desired, diff to current via hash.diff
+    end
+
     # TODO: validate content as parseable plist.
     def should_to_s(v)
       puts 'should'
