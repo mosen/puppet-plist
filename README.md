@@ -16,12 +16,7 @@ Always and Once policies.
 The content of the plist file is specified as an .erb template, which suits dynamic subsitution of values, or we can use
 a static file.
 
-The two plist resource policies are `defaults` and `enforced`.
 
-`defaults` means that the contents of the template are merged into the target plist, only if the keys don't exist in the
-target.
-
-`enforced` means that keys that do exist already in the target plist, are overwritten.
 
 In any case, if the keys don't exist in the target they are set based on the template (source) plist.
 
