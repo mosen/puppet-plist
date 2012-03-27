@@ -16,9 +16,19 @@ class puppet-plist {
 	
 	$settings_string = "this is a test string."
 
-	plist { "/tmp/test.plist":
+	#plist { "/tmp/test.plist":
 		# This should be replaced with the same content property as the 'File' type.
-		content => template('puppet-plist/test.plist.erb'),
-		force => false,
-	}	
+	#	content => template('puppet-plist/test.plist.erb'),
+	#	force => false,
+	#}
+
+
+    # This is another test of a plist key/value based resource type.
+
+    plistkv { "/tmp/test.plist:keyname":
+        ensure     => present,
+        provider   => plistbuddy,
+        value      => "testvalue",
+        value_type => string,
+    }
 }

@@ -6,7 +6,7 @@ Puppet::Type.type(:plistkv).provide :plist, :parent => Puppet::Provider do
     saving the plist file again.
   "
 
-  defaultfor :operatingsystem => :darwin
+  #defaultfor :operatingsystem => :darwin
 
   has_feature :plist
 

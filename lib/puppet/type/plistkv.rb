@@ -22,8 +22,6 @@ Puppet::Type.newtype(:plistkv) do
 
   ensurable
 
-  feature :plist, "The ability to parse and generate .plist files in binary and xml formats."
-
   newparam(:path) do
     desc "Path to the plist file and the key inside it, in the form:
 
@@ -35,6 +33,29 @@ Puppet::Type.newtype(:plistkv) do
 
   newparam(:value) do
     desc "The value assigned to the specified key."
+  end
+
+  newparam(:value_type) do
+    desc "The native type of the value. From the following native plist types:
+
+    Array, Bignum, Date, DateTime, Fixnum, Float, Hash, Integer, String, Symbol, Time, true, false
+    "
+
+    newvalues(:array)
+    newvalues(:bignum)
+    newvalues(:date)
+    newvalues(:datetime)
+    newvalues(:fixnum)
+    newvalues(:float)
+    newvalues(:hash)
+    newvalues(:integer)
+    newvalues(:string)
+    newvalues(:symbol)
+    newvalues(:time)
+    newvalues(:true)
+    newvalues(:false)
+
+    defaultto :string
   end
 
 end
