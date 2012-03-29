@@ -38,22 +38,18 @@ Puppet::Type.newtype(:plistkv) do
   newparam(:value_type) do
     desc "The native type of the value. From the following native plist types:
 
-    Array, Bignum, Date, DateTime, Fixnum, Float, Hash, Integer, String, Symbol, Time, true, false
+    string, array, dict, bool, real, integer, date, data
     "
 
-    newvalues(:array)
-    newvalues(:bignum)
-    newvalues(:date)
-    newvalues(:datetime)
-    newvalues(:fixnum)
-    newvalues(:float)
-    newvalues(:hash)
-    newvalues(:integer)
     newvalues(:string)
-    newvalues(:symbol)
-    newvalues(:time)
-    newvalues(:true)
-    newvalues(:false)
+    newvalues(:array)
+    newvalues(:dict)
+    newvalues(:bool)
+    newvalues(:real)
+    newvalues(:integer)
+    newvalues(:date)
+    newvalues(:data)
+    # TODO: support for other types which are less common.
 
     defaultto :string
   end
