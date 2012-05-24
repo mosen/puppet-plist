@@ -1,4 +1,4 @@
-class puppet-plist {
+class plist {
 
 	notify { "Running plist testing manifest": }
 

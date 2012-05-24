@@ -38,9 +38,9 @@ Puppet::Type.type(:plistkv).provide :plistbuddy, :parent => Puppet::Provider do
       file_path = elements.shift
 
       buddycmd = "Print :%s" % elements.join(':')
-      plistbuddy(file_path, '-c', buddycmd)
 
-      true
+      # TODO: Not doing any type checking
+      @resource[:value] == plistbuddy(file_path, '-c', buddycmd)
     rescue Exception => e
       puts e.message
       # Command execution returns non-zero status
