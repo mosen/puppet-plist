@@ -24,8 +24,6 @@ Puppet::Type.type(:plistkv).provide :plistbuddy, :parent => Puppet::Provider do
       file_path = elements.shift
 
       buddycmd = "Delete :%s" % elements.join(':')
-      # Note that the puppet 'commands' provider method automatically quotes every parameter.
-      #plistbuddy(file_path, '-c', '"%s"' % buddycmd)
       plistbuddy(file_path, '-c', buddycmd)
     rescue Exception => e
       puts e.message
@@ -40,7 +38,6 @@ Puppet::Type.type(:plistkv).provide :plistbuddy, :parent => Puppet::Provider do
       file_path = elements.shift
 
       buddycmd = "Print :%s" % elements.join(':')
-      #plistbuddy(file_path, '-c', '"%s"' % buddycmd)
       plistbuddy(file_path, '-c', buddycmd)
 
       true
