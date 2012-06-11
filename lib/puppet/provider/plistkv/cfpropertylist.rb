@@ -1,14 +1,10 @@
 require 'facter/util/cfpropertylist' # TODO: ruby-libxml not always available
 
-Puppet::Type.type(:plistkv).provide :plist, :parent => Puppet::Provider do
+Puppet::Type.type(:plist).provide :cfpropertylist, :parent => Puppet::Provider do
   desc "
     This provider modifies a given plist key to the specified value by parsing the entire plist, modifying the value and
     saving the plist file again.
   "
-
-  #defaultfor :operatingsystem => :darwin
-
-  has_feature :plist
 
   # Find a value given an array of keys
   def self.keypath_value(hash, keys)

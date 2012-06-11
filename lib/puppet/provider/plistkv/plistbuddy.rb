@@ -1,4 +1,4 @@
-Puppet::Type.type(:plistkv).provide :plistbuddy, :parent => Puppet::Provider do
+Puppet::Type.type(:plist).provide :plistbuddy, :parent => Puppet::Provider do
   desc "This provider alters plist values using the PlistBuddy(8) command line utility."
 
   commands :plistbuddy => "/usr/libexec/PlistBuddy"

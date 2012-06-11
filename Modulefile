@@ -1,0 +1,7 @@
+name 'plist'
+author 'mosen'
+description 'Property list modification'
+source 'https://github.com/mosen/puppet-plist.git'
+summary 'This module manages values in property list (.plist) files for Mac OS X'
+license 'GPLv3'
+version '0.0.1'
