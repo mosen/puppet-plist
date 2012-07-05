@@ -1,4 +1,5 @@
 Puppet::Type.newtype(:plist) do
+
   @doc = "
   Manage single keys inside a plist file.
 
@@ -19,6 +20,28 @@ Puppet::Type.newtype(:plist) do
 
   ensurable
 
+  attr_accessor :filename
+  attr_accessor :keys
+
+  def value_type
+    return value(:value_type) if !value(:value_type).nil?
+
+    inferred_type(value(:value))
+  end
+
+  # Try to guess the CFPropertyList type based on the value
+  def inferred_type(value)
+    case value
+      when Array then :array
+      when %r{^\d+$} then :integer
+      when %r{^\d*\.\d+$} then :real # Doesnt really catch all valid real numbers.
+      when true || false then :bool
+      # when %r{^\d{4}-\d{2}-\d{2}} then :date # Not currently supported, requires munging to native Date type
+      else
+        :string
+    end
+  end
+
   newparam(:path) do
     desc "Path to the plist file and the key inside it (a colon separates child and parent keys), in the form:
 
@@ -26,6 +49,14 @@ Puppet::Type.newtype(:plist) do
     "
 
     isnamevar
+
+    munge do |value|
+      parts = value.split(/:/)
+      @resource.filename = parts.shift
+      @resource.keys = parts
+
+      value
+    end
   end
 
   newparam(:value) do
@@ -43,8 +74,6 @@ Puppet::Type.newtype(:plist) do
     newvalues(:integer)
     newvalues(:date)
     newvalues(:data)
-
-    defaultto :string
   end
 
 end
