@@ -1,4 +1,4 @@
-Puppet::Type.newtype(:plistkv) do
+Puppet::Type.newtype(:plist) do
   @doc = "
   Manage single keys inside a plist file.
 
@@ -6,24 +6,21 @@ Puppet::Type.newtype(:plistkv) do
   where the value is a simple non-hierarchical value such as an integer or string.
 
   The path to the plist and the key that you would like to modify are constructed similar to the PlistBuddy(8) command
-  line utility, that is:
+  line utility, eg, if i want to change the value of a key called childkey in file.plist, the name of the resource would
+  be like this:
+
+  /full/path/to/file.plist:parentkey:childkey
 
   - The full path to the .plist file comes first.
   - Then a colon indicates the root of the plist dictionary.
   - And finally the name of the key in the plist we want to change.
   - If the key is a child of the value of another key, use colons to separate the key names (or indexes).
-
-  Eg.
-
-  /full/path/to/file.plist:parentkey:childkey
-
-  To change the value of childkey in the file file.plist.
   "
 
   ensurable
 
   newparam(:path) do
-    desc "Path to the plist file and the key inside it, in the form:
+    desc "Path to the plist file and the key inside it (a colon separates child and parent keys), in the form:
 
     /full/path/to/file.plist:parentkey:childkey
     "
@@ -36,10 +33,7 @@ Puppet::Type.newtype(:plistkv) do
   end
 
   newparam(:value_type) do
-    desc "The native type of the value. From the following native plist types:
-
-    string, array, dict, bool, real, integer, date, data
-    "
+    desc "The suggested native type of the value. Without this, you will get the inferred best guess."
 
     newvalues(:string)
     newvalues(:array)
@@ -49,7 +43,6 @@ Puppet::Type.newtype(:plistkv) do
     newvalues(:integer)
     newvalues(:date)
     newvalues(:data)
-    # TODO: support for other types which are less common.
 
     defaultto :string
   end
