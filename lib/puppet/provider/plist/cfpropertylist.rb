@@ -34,7 +34,7 @@ Puppet::Type.type(:plist).provide :cfpropertylist, :parent => Puppet::Provider d
       begin
         debug("Reading existing Plist at #{file_path}")
         plist = Facter::Util::CFPropertyList::List.new(:file => file_path)
-        #plist_content = Facter::Util::CFPropertyList.native_types(plist.value)
+        plist_content = Facter::Util::CFPropertyList.native_types(plist.value)
       rescue Exception => e
         debug("Got exception trying to read Plist file: #{e}")
       end
@@ -60,7 +60,12 @@ Puppet::Type.type(:plist).provide :cfpropertylist, :parent => Puppet::Provider d
       end
     end
 
-    hash_to_modify[value_key] = @resource[:value]
+    hash_to_modify[value_key] = case @resource.value_type
+      when :integer then @resource[:value].to_i
+      when :real then @resource[:value].to_f
+      when :date then Date.parse(@resource[:value])
+      else @resource[:value]
+    end
 
     #debug('New structure: ' + plist_content.inspect)
 
@@ -68,37 +73,51 @@ Puppet::Type.type(:plist).provide :cfpropertylist, :parent => Puppet::Provider d
     plist.save(file_path, Facter::Util::CFPropertyList::List::FORMAT_XML)
   end
 
-  #
-  #def destroy
-  #  elements = @resource[:name].split(/[^\\]:/)
-  #  file_path = elements.pop
-  #
-  #  begin
-  #    raise "Does not exist" if !File.exists?(file_path)
-  #    raise "File is unreadable" if !File.readable?(file_path)
-  #
-  #    plist_file = CFPropertyList::List.new(:file => file_path)
-  #    native_values = CFPropertyList.native_types(plist_file.value)
-  #
-  #    containing_hash = self.class.keypath(native_values, elements)
-  #
-  #    if containing_hash == nil
-  #      raise "The specified key does not exist in the plist dictionary."
-  #    else
-  #      containing_hash.delete elements[elements.count - 1]
-  #      # TODO: save resulting hash to plist
-  #    end
-  #  rescue
-  #    puts "Failed to destroy"
-  #  end
-  #end
-  #
+
+  # TODO: DRY
+  def destroy
+    file_path = @resource.filename
+    keys = @resource.keys
+
+    begin
+      debug("Reading existing Plist at #{file_path}")
+      plist = Facter::Util::CFPropertyList::List.new(:file => file_path)
+      plist_content = Facter::Util::CFPropertyList.native_types(plist.value)
+    rescue Exception => e
+      raise "Got exception trying to read Plist file: #{e}"
+    end
+
+
+    hash_to_modify = plist_content
+    value_key = keys.pop
+
+    #debug('Path to Plist parent key: ' + keys.join(':'))
+    #debug('Plist key: ' + value_key)
+
+    keys.each do |key|
+      if hash_to_modify.has_key? key
+        hash_to_modify = hash_to_modify[key]
+      else
+        child = Hash.new
+        hash_to_modify[key] = child
+        hash_to_modify = child
+      end
+    end
+
+    hash_to_modify.delete(value_key)
+
+    #debug('New structure: ' + plist_content.inspect)
+
+    plist.value = Facter::Util::CFPropertyList.guess(plist_content)
+    plist.save(file_path, Facter::Util::CFPropertyList::List::FORMAT_XML)
+  end
+
   def exists?
     file_path = @resource.filename
     keys = @resource.keys
 
     begin
-      raise "Does not exist" if !File.exists?(file_path)
+      raise "File does not exist" if !File.exists?(file_path)
       raise "File is unreadable" if !File.readable?(file_path)
 
       plist_file = Facter::Util::CFPropertyList::List.new(:file => file_path)
