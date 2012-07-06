@@ -8,7 +8,6 @@ Puppet::Type.type(:plist).provide :plistbuddy, :parent => Puppet::Provider do
 
   commands :plistbuddy => "/usr/libexec/PlistBuddy"
   confine :operatingsystem => :darwin
-  defaultfor :operatingsystem => :darwin
 
   def create
       begin

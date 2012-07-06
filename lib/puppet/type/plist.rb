@@ -33,6 +33,7 @@ Puppet::Type.newtype(:plist) do
   def inferred_type(value)
     case value
       when Array then :array
+      when Hash then :dict
       when %r{^\d+$} then :integer
       when %r{^\d*\.\d+$} then :real # Doesnt really catch all valid real numbers.
       when true || false then :bool
