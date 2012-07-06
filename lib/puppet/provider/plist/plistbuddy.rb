@@ -56,10 +56,13 @@ Puppet::Type.type(:plist).provide :plistbuddy, :parent => Puppet::Provider do
       keys = @resource.keys
 
       buddycmd = "Print :%s" % keys.join(':')
+      buddyvalue = plistbuddy(file_path, '-c', buddycmd).strip
 
       # TODO: Not doing any type checking
-      @resource[:value] == plistbuddy(file_path, '-c', buddycmd)
+      # TODO: Arrays and Real Numbers are not correctly value compared
+      @resource[:value].to_s == buddyvalue
     rescue Exception => e
+      # A bad return value from plistbuddy indicates that the key does not exist.
       false
     end
   end
