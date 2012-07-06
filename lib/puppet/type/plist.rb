@@ -36,7 +36,7 @@ Puppet::Type.newtype(:plist) do
       when %r{^\d+$} then :integer
       when %r{^\d*\.\d+$} then :real # Doesnt really catch all valid real numbers.
       when true || false then :bool
-      # when %r{^\d{4}-\d{2}-\d{2}} then :date # Not currently supported, requires munging to native Date type
+      when %r{^\d{4}-\d{2}-\d{2}} then :date # Not currently supported, requires munging to native Date type
       else
         :string
     end

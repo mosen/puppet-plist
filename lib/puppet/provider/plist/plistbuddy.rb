@@ -20,17 +20,20 @@ Puppet::Type.type(:plist).provide :plistbuddy, :parent => Puppet::Provider do
 
           # Add the array entry
           buddycmd = "Add :%s %s %s" % [ keys.join(':'), value_type, @resource[:value] ]
-          plistbuddy(file_path, '-c', buddycmd)
 
           # Add the elements
           @resource[:value].each do |value|
-            buddycmd = "Add :%s:0 %s %s" % [ keys.join(':'), 'string', value ]
             plistbuddy(file_path, '-c', buddycmd)
+            buddycmd = "Add :%s:0 %s %s" % [ keys.join(':'), 'string', value ]
           end
+        elsif value_type == :date
+          native_date = Date.parse(@resource[:value])
+          buddycmd = "Add :%s %s %s" % [ keys.join(':'), value_type,  native_date.strftime('%a %b %e %H:%M:%S %Z %Y')]
         else
           buddycmd = "Add :%s %s %s" % [ keys.join(':'), value_type, @resource[:value] ]
-          plistbuddy(file_path, '-c', buddycmd)
         end
+
+        plistbuddy(file_path, '-c', buddycmd)
 
       rescue Exception => e
         false
@@ -59,7 +62,8 @@ Puppet::Type.type(:plist).provide :plistbuddy, :parent => Puppet::Provider do
       buddyvalue = plistbuddy(file_path, '-c', buddycmd).strip
 
       # TODO: Not doing any type checking
-      # TODO: Arrays and Real Numbers are not correctly value compared
+      # TODO: Arrays and Real Numbers are not correctly value compared (Arrays dont get parsed from PlistBuddy output,
+      # and real numbers dont have the same decimal representation internally)
       @resource[:value].to_s == buddyvalue
     rescue Exception => e
       # A bad return value from plistbuddy indicates that the key does not exist.
