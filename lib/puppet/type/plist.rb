@@ -20,6 +20,9 @@ Puppet::Type.newtype(:plist) do
 
   ensurable
 
+  feature :structured_values, "The ability to get and set structured values."
+  feature :fragments, "The ability to use plist fragments to set values."
+
   attr_accessor :filename
   attr_accessor :keys
 
@@ -32,14 +35,13 @@ Puppet::Type.newtype(:plist) do
   # Try to guess the CFPropertyList type based on the value
   def inferred_type(value)
     case value
-      when Array then :array
-      when Hash then :dict
-      when %r{^\d+$} then :integer
-      when %r{^\d*\.\d+$} then :real # Doesnt really catch all valid real numbers.
-      when true || false then :bool
-      when %r{^\d{4}-\d{2}-\d{2}} then :date # Not currently supported, requires munging to native Date type
-      else
-        :string
+    when Array then :array
+    when Hash then :dict
+    when %r{^\d+$} then :integer
+    when %r{^\d*\.\d+$} then :real # Doesnt really catch all valid real numbers.
+    when true || false then :bool
+    when %r{^\d{4}-\d{2}-\d{2}} then :date # Not currently supported, requires munging to native Date type
+    else :string
     end
   end
 
@@ -62,6 +64,12 @@ Puppet::Type.newtype(:plist) do
 
   newparam(:value) do
     desc "The value assigned to the specified key."
+  end
+
+  newparam(:content, :required_features => %w{fragments}) do
+    desc "The value assigned to the specified key as a plist fragment (a parseable plist document that will be inserted
+    at the given key. The value parameter will be ignored if this is set."
+
   end
 
   newparam(:value_type) do
