@@ -3,7 +3,7 @@ require 'facter/util/cfpropertylist'
 Puppet::Type.type(:plist).provide :cfpropertylist, :parent => Puppet::Provider do
   desc "This provider parses and modifies the PropertyList using CFPropertyList starting from facter 2.0"
 
-  confine :facterversion => '2.0.0'
+  confine :facterversion => '2.0.0' # CFPropertyList is bundled with facter 2
   defaultfor :operatingsystem => :darwin
   # Not confined to darwin because CFPropertyList can work fine on other platforms.
 

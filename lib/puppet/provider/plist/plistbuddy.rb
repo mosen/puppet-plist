@@ -4,6 +4,8 @@ Puppet::Type.type(:plist).provide :plistbuddy, :parent => Puppet::Provider do
 
   Because of the way that PlistBuddy deals with types, it cannot convert an existing Plist key from one type to another.
   The key must first be removed in order to change the type of value it contains.
+
+  There also seems to be no documentation about the appropriate date format.
   "
 
   commands :plistbuddy => "/usr/libexec/PlistBuddy"
