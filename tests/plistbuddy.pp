@@ -12,9 +12,15 @@ node default {
         value_type => string,
     }
 
-    plist { "/tmp/test.plist:basic_boolean":
+    plist { "/tmp/test.plist:basic_boolean_false":
         ensure     => present,
         value      => false,
+        value_type => bool,
+    }
+
+    plist { "/tmp/test.plist:basic_boolean_true":
+        ensure     => present,
+        value      => true,
         value_type => bool,
     }
 

@@ -64,9 +64,9 @@ Puppet::Type.type(:plist).provide :plistbuddy, :parent => Puppet::Provider do
       buddycmd = "Print :%s" % keys.join(':')
       buddyvalue = plistbuddy(file_path, '-c', buddycmd).strip
 
-      # TODO: Not doing any type checking
-      # TODO: Arrays and Real Numbers are not correctly value compared (Arrays dont get parsed from PlistBuddy output,
-      # and real numbers dont have the same decimal representation internally)
+      # TODO: Compare the elements of the array by parsing the output from PlistBuddy
+      # TODO: Convert desired dates into a format that can be compared by value.
+      # TODO: Find a way of comparing Real numbers by casting to Float etc.
       case @resource.value_type
         when :array
           true # Assume the existence of the array even if the elements are different. Otherwise we need to parse the output

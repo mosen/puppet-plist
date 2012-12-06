@@ -1,5 +1,3 @@
-require 'facter/util/cfpropertylist'
-
 Puppet::Type.type(:plist).provide :cfpropertylist, :parent => Puppet::Provider do
   desc "This provider parses and modifies the PropertyList using CFPropertyList starting from facter 2.0"
 
@@ -27,6 +25,8 @@ Puppet::Type.type(:plist).provide :cfpropertylist, :parent => Puppet::Provider d
   end
 
   def create
+    require 'facter/util/cfpropertylist'
+
     file_path = @resource.filename
     keys = @resource.keys
 
@@ -76,6 +76,8 @@ Puppet::Type.type(:plist).provide :cfpropertylist, :parent => Puppet::Provider d
 
   # TODO: DRY
   def destroy
+    require 'facter/util/cfpropertylist'
+
     file_path = @resource.filename
     keys = @resource.keys
 
@@ -113,6 +115,8 @@ Puppet::Type.type(:plist).provide :cfpropertylist, :parent => Puppet::Provider d
   end
 
   def exists?
+    require 'facter/util/cfpropertylist'
+
     file_path = @resource.filename
     keys = @resource.keys
 
