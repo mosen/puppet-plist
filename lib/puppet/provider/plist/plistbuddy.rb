@@ -27,9 +27,11 @@ Puppet::Type.type(:plist).provide :plistbuddy, :parent => Puppet::Provider do
             plistbuddy(file_path, '-c', buddycmd)
             buddycmd = "Add :%s:0 %s %s" % [ keys.join(':'), 'string', value ]
           end
-        elsif value_type == :date
+        elsif value_type == :date # Example of a date that PlistBuddy will accept Mon Jan 01 00:00:00 EST 4001
           native_date = Date.parse(@resource[:value])
-          buddycmd = "Add :%s %s %s" % [ keys.join(':'), value_type,  native_date.strftime('%a %b %e %H:%M:%S %Z %Y')]
+          # Note that PlistBuddy will only accept certain timezone formats like 'EST' or 'GMT' but not other valid
+          # timezones like 'PST'. So the compromise is that times must be in UTC
+          buddycmd = "Add :%s %s %s" % [ keys.join(':'), value_type,  native_date.strftime('%a %b %d %H:%M:%S %Y')]
         else
           buddycmd = "Add :%s %s %s" % [ keys.join(':'), value_type, @resource[:value] ]
         end
@@ -65,7 +67,17 @@ Puppet::Type.type(:plist).provide :plistbuddy, :parent => Puppet::Provider do
       # TODO: Not doing any type checking
       # TODO: Arrays and Real Numbers are not correctly value compared (Arrays dont get parsed from PlistBuddy output,
       # and real numbers dont have the same decimal representation internally)
-      @resource[:value].to_s == buddyvalue
+      case @resource.value_type
+        when :array
+          true # Assume the existence of the array even if the elements are different. Otherwise we need to parse the output
+        when :real
+          true # Assume the existence of the real number because the actual value will be stored differently.
+        when :date
+          true # Assume the existence of the date is enough. This is because the timezone will be converted upon adding the date.
+        else
+          @resource[:value].to_s == buddyvalue
+      end
+
     rescue Exception => e
       # A bad return value from plistbuddy indicates that the key does not exist.
       false
