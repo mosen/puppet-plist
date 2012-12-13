@@ -33,7 +33,7 @@ or possibly just do nothing.
 ### Bugs
 
 + Hash type doesnt work
-+ Date type doesnt work
++ Date type doesnt wor
 
 Please submit any issues through Github issues as I don't have a dedicated project page for this module.
 

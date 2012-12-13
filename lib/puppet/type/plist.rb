@@ -45,13 +45,11 @@ Puppet::Type.newtype(:plist) do
     end
   end
 
-  newparam(:path) do
+  newparam(:path, :namevar => true) do
     desc "Path to the plist file and the key inside it (a colon separates child and parent keys), in the form:
 
     /full/path/to/file.plist:parentkey:childkey
     "
-
-    isnamevar
 
     munge do |value|
       parts = value.split(/:/)
@@ -62,15 +60,15 @@ Puppet::Type.newtype(:plist) do
     end
   end
 
-  newparam(:value) do
+  newproperty(:value) do
     desc "The value assigned to the specified key."
   end
 
-  newparam(:content, :required_features => %w{fragments}) do
-    desc "The value assigned to the specified key as a plist fragment (a parseable plist document that will be inserted
-    at the given key. The value parameter will be ignored if this is set."
-
-  end
+  #newparam(:content, :required_features => %w{fragments}) do
+  #  desc "The value assigned to the specified key as a plist fragment (a parseable plist document that will be inserted
+  #  at the given key. The value parameter will be ignored if this is set."
+  #
+  #end
 
   newparam(:value_type) do
     desc "The suggested native type of the value. Without this, you will get the inferred best guess."
