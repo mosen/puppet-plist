@@ -53,6 +53,7 @@ Puppet::Type.newtype(:plist) do
 
     munge do |value|
       parts = value.split(/:/)
+
       @resource.filename = parts.shift
       @resource.keys = parts
 
