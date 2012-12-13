@@ -62,6 +62,7 @@ Puppet::Type.newtype(:plist) do
 
   newproperty(:value) do
     desc "The value assigned to the specified key."
+
   end
 
   #newparam(:content, :required_features => %w{fragments}) do

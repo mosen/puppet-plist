@@ -28,13 +28,12 @@ Puppet::Type.type(:plist).provide :plistbuddy, :parent => Puppet::Provider do
 
             prefetched_values = {
                 :name     => name,
-                :ensure   => :present,
-                :provider => :plistbuddy
+                :ensure   => :present
             }
 
             case resource[:value_type]
               when :real
-                prefetched_values[:value] = print_value[0..resource[:value].length]
+                prefetched_values[:value] = print_value.to_f
               when :date
                 prefetched_values[:value] = Date.new(print_value)
               else
@@ -42,11 +41,12 @@ Puppet::Type.type(:plist).provide :plistbuddy, :parent => Puppet::Provider do
             end
 
             resource.provider = new(prefetched_values)
-          rescue Exception => e
-            resource.provider = new({ :ensure => :absent, :provider => :plistbuddy })
+
+          rescue Exception => e # Command exit status was bad, assume the plist key doesn't exist
+            resource.provider = new({ :ensure => :absent })
           end
-        else
-          resource.provider = new({ :ensure => :absent, :provider => :plistbuddy })
+        else # File doesn't exist therefore plist key doesn't exist
+          resource.provider = new({ :ensure => :absent })
         end
       end
     end
@@ -54,24 +54,29 @@ Puppet::Type.type(:plist).provide :plistbuddy, :parent => Puppet::Provider do
   end
 
   def create
-    @resource[:ensure] = :present
+    @property_hash[:ensure] = :present
+    self.class.resource_type.validproperties.each do |property|
+      if val = resource.should(property)
+        @property_hash[property] = val
+      end
+    end
   end
 
   def destroy
-    @resource[:ensure] = :absent
+    @property_hash[:ensure] = :absent
   end
 
   def exists?
-    @property_hash[:ensure] == :present
+    @property_hash[:ensure] != :absent
   end
 
   def flush
 
-    file_path = @resource.filename
-    keys = @resource.keys
-    value_type = @resource[:value_type]
+    file_path = resource.filename
+    keys = resource.keys
+    value_type = resource[:value_type]
 
-    case @resource[:ensure]
+    case resource[:ensure]
       when :absent
         begin
           delete_cmd = "Delete :%s" % keys.join(':')
@@ -79,6 +84,7 @@ Puppet::Type.type(:plist).provide :plistbuddy, :parent => Puppet::Provider do
         rescue Exception => e
           false
         end
+
       when :present
         begin
           # Resource WAS absent
@@ -90,21 +96,22 @@ Puppet::Type.type(:plist).provide :plistbuddy, :parent => Puppet::Provider do
 
           case value_type
             when :array
+              fail('The Plistbuddy provider does not support structured values.')
               # Add the array entry
-              buddy_cmd << "%s" % [ @resource[:value] ]
-
-              # Add the elements
-              @property_hash[:value].each do |value|
-                plistbuddy(file_path, '-c', buddy_cmd)
-                buddy_cmd = "Add :%s:0 %s %s" % [ keys.join(':'), 'string', value ]
-              end
+              #buddy_cmd << "%s" % [ @resource[:value] ]
+              #
+              ## Add the elements
+              #@property_hash[:value].each do |value|
+              #  plistbuddy(file_path, '-c', buddy_cmd)
+              #  buddy_cmd = "Add :%s:0 %s %s" % [ keys.join(':'), 'string', value ]
+              #end
             when :date # Example of a date that PlistBuddy will accept Mon Jan 01 00:00:00 EST 4001
               native_date = Date.parse(@resource[:value])
               # Note that PlistBuddy will only accept certain timezone formats like 'EST' or 'GMT' but not other valid
               # timezones like 'PST'. So the compromise is that times must be in UTC
               buddy_cmd << "%s" % [ native_date.strftime('%a %b %d %H:%M:%S %Y') ]
             when :real # The precision of the number returned and the one supplied may not be the same.
-              buddy_cmd << @property_hash[:value]
+              buddy_cmd << @property_hash[:value].to_f.to_s
             else
               buddy_cmd << @resource[:value].to_s
           end
